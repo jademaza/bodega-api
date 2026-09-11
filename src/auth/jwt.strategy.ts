@@ -4,21 +4,35 @@ import {
 } from '@nestjs/common';
 
 import { PassportStrategy } from '@nestjs/passport';
+
 import {
   ExtractJwt,
   Strategy,
 } from 'passport-jwt';
 
+import { ConfigService } from '@nestjs/config';
+
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor() {
+  constructor(
+    private readonly configService: ConfigService,
+  ) {
+    const jwtSecret =
+      configService.get<string>('JWT_SECRET');
+
+    if (!jwtSecret) {
+      throw new Error(
+        'JWT_SECRET no está configurado en el archivo .env',
+      );
+    }
+
     super({
       jwtFromRequest:
         ExtractJwt.fromAuthHeaderAsBearerToken(),
 
       ignoreExpiration: false,
 
-      secretOrKey: process.env.JWT_SECRET!,
+      secretOrKey: jwtSecret,
     });
   }
 
@@ -36,6 +50,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     if (!payload.sub) {
       throw new UnauthorizedException(
         'El token no contiene un usuario válido',
+      );
+    }
+
+    if (!payload.email) {
+      throw new UnauthorizedException(
+        'El token no contiene un correo válido',
       );
     }
 

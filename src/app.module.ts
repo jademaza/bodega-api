@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -14,9 +15,13 @@ import { CreditosModule } from './creditos/creditos.module';
 import { DetallesCreditoModule } from './detalles-credito/detalles-credito.module';
 import { PagosModule } from './pagos/pagos.module';
 
-
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: '.env',
+    }),
+
     DrizzleModule,
     AuthModule,
     RolesModule,
